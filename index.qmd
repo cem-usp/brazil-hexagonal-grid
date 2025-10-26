@@ -1,0 +1,479 @@
+```{r}
+#| label: setup
+#| include: false
+
+library(here)
+
+source(here("R", "_setup.R"))
+```
+
+<!-- badges: start -->
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
+[![License: GPLv3](https://img.shields.io/badge/license-GPLv3-bd0000.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/license-CC_BY--NC--SA_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+<!-- badges: end -->
+
+## Overview
+
+This report presents a reproducible pipeline for generating [hexagonal grids](https://en.wikipedia.org/wiki/Grid_(spatial_index)) of Brazilian municipalities. The pipeline was developed in the [R programming language](https://www.r-project.org/) by **Flávio Soares** and **Clara Penz**, with further adaptations by [**Daniel Vartanian**](https://github.com/danielvartan).
+
+For instructions on how to run the pipeline, see the repository [README](https://github.com/cem-usp/brazil-hexagonal-grid/blob/main/README.md).
+
+## Set the Environment
+
+### Load Packages
+
+```{r}
+#| output: false
+
+library(arrow)
+library(beepr)
+library(curl)
+library(dplyr)
+library(elevatr)
+library(fs)
+library(geobr)
+library(h3jsr)
+library(here)
+library(htmltools)
+library(lockr) # github.com/danielvartan/lockr
+library(magrittr)
+library(osfr)
+library(osmdata)
+library(raster)
+library(readr)
+library(sf)
+library(sfarrow)
+library(tictoc)
+```
+
+### Set Keys
+
+```{r}
+osf_pat <- Sys.getenv("OSF_PAT") # askpass()
+```
+
+```{r}
+#| eval: false
+#| output: false
+
+osf_auth(osf_pat)
+```
+
+```{r}
+public_key <- here("_ssh", "id_rsa.pub")
+```
+
+```{r}
+private_key <- here("_ssh", "id_rsa")
+```
+
+```{r}
+password <- Sys.getenv("ACESSOSAN_PASSWORD") # askpass()
+```
+
+### Set Input and Output Paths
+
+```{r}
+dir_inputs <- here("1-inputs")
+dir_parcial <- here("2-parcial")
+```
+
+```{r}
+for (i in c(dir_inputs, dir_parcial)) {
+  if (!dir_exists(i)) {
+    dir_create(i, recurse = TRUE)
+  }
+}
+```
+
+### Set Municipality Data
+
+```{r}
+municipios <- c(
+  3550308, # São Paulo
+  2507507, # João Pessoa
+  3106200, # Belo Horizonte
+  4314902, # Porto Alegre
+  1721000, # Palmas
+  5300108, # Brasília
+  5208707  # Goiânia
+)
+```
+
+### Set Initial Variables
+
+```{r}
+set.seed(2025)
+```
+
+## Download IBGE Census Data
+
+### Download File
+
+```{r}
+osf_raw_data_id <- "zuy4s"
+```
+
+```{r}
+#| eval: false
+
+osf_raw_data_files <-
+  osf_raw_data_id |>
+  osf_retrieve_node() |>
+  osf_ls_files(
+    type = "file",
+    pattern = "censo2022_hex",
+    n_max = Inf
+  )
+
+osf_raw_data_files
+```
+
+```{r}
+#| eval: false
+
+ibge_2022_census_hex_file <-
+  osf_raw_data_files |>
+  osf_download(path = dir_inputs, conflicts = "overwrite") |>
+  extract2("local_path")
+```
+
+### Unlock File
+
+```{r}
+#| eval: false
+#| output: false
+
+ibge_2022_census_hex_file <-
+  ibge_2022_census_hex_file |>
+  unlock_file(
+    private_key = private_key,
+    suffix = ".lockr",
+    remove_file = TRUE,
+    password = password
+  )
+```
+
+```{r}
+#| echo: false
+
+ibge_2022_census_hex_file <- here(dir_inputs, "censo2022_hex.csv")
+```
+
+## Download Brazil OSM Data
+
+> Source: <https://download.geofabrik.de/south-america/brazil.html>
+
+```{r}
+#| eval: false
+
+file.path(
+  "https://download.geofabrik.de",
+  "south-america",
+  "brazil-latest.osm.pbf"
+) |>
+  curl_download(
+    destfile = here(dir_inputs, "brazil-latest.osm.pbf"),
+    quiet = FALSE
+  )
+```
+
+```{r}
+osm_brazil_latest_file <- here(dir_inputs, "brazil-latest.osm.pbf")
+```
+
+## 01.01-criar_malha_hexagonal_areas_total_urbana.R
+
+> Cria malhas hexagonais para os municípios a serem analisados.
+>
+> Aqui teria 2 etapas que estão faltando no script:
+>
+> 1. Trabalhar a área urbanizada do IBGE.
+> 2. Gerar hexágonos da área urbanizada.
+
+### Ler Hexágonos Urbanizados do Brasil com Dados do Censo 2022
+
+```{r}
+#| eval: false
+
+hexurb <-
+  ibge_2022_census_hex_file |>
+  read_delim(delim = ",") |>
+  # Filtrar fora linhas com somente 0 em todas as variáveis exceto `h3_address`.
+  filter(!if_all(-h3_address, \(x) x == 0))
+
+hexurb |> glimpse()
+```
+
+### Criar Malha Hexagonal e Separar entre Urbano e Não-Urbano
+
+```{r}
+#| eval: false
+
+for (cod in municipios) {
+  # Baixar geometria do município.
+  municipio_geom <- read_municipality(code_muni = cod, year = 2020)
+
+  # Converter polígono para células H3.
+  hex <- polygon_to_cells(geometry = municipio_geom$geom, res = 9)
+
+  # Converter células H3 de volta para polígonos.
+  hexgrid <- cell_to_polygon(input = hex, simple = FALSE)
+
+  print(paste("Malha hexagonal criada para", cod))
+
+  # Separar hexágonos urbanizados.
+  hex_urb_mun <-
+    hexgrid |>
+    left_join(hexurb, by = "h3_address") |>
+    filter(if_all(-h3_address, ~ !is.na(.x))) |>
+    mutate(across(where(is.numeric) & !any_of("h3_address"), abs))
+
+  print("Filtragem realizada")
+
+  # Criar diretório.
+  dir_hex <- file.path(dir_parcial, cod, "hex")
+  dir.create(dir_hex, showWarnings = FALSE, recursive = TRUE)
+
+  # Salvar arquivos.
+  # Total
+  st_write_parquet(hexgrid, file.path(dir_hex, "hex.parquet"))
+  # Urbanizado
+  st_write_parquet(hex_urb_mun, file.path(dir_hex, "hex_urbanizado.parquet"))
+}
+```
+
+## 01.02-processar_elevation.R
+
+### Criar Arquivo `.tiff` para a Área Urbanizada de Cada Município
+
+```{r}
+#| eval: false
+
+for (cod in municipios) {
+  # Definir caminho do arquivo `.tiff`.
+  elevation_path <- file.path(dir_parcial, cod, "elevation.tiff")
+
+  # Ler `hexgrid` do município
+  hexgrid <-
+    file.path(
+      dir_parcial,
+      cod,
+      "hex",
+      "hex_urbanizado.parquet"
+    ) |>
+    st_read_parquet()
+
+  # Criar raster de elevação (zoom `z=13`)
+  elev_raster <-
+    hexgrid |>
+    get_elev_raster(
+      z = 13,
+      override_size_check = TRUE
+    )
+
+  # Salvar .tiff
+  writeRaster(elev_raster, elevation_path, overwrite = TRUE)
+
+  print(paste("Arquivo .tiff criado para município", cod))
+}
+```
+
+## 01.03-processar_osm.R
+
+### Criar Malha de Transporte para a Área Urbanizada de Cada Município
+
+```{r}
+#| eval: false
+#| output: false
+
+for (cod in municipios) {
+  print(paste("Processando", cod))
+
+  # Definir diretório de saída.
+  dir_mun <- file.path(dir_parcial, cod)
+  dir.create(dir_mun, showWarnings = FALSE, recursive = TRUE)
+
+  # Bounding box do município.
+  mun_hex <-
+    file.path(
+      dir_mun,
+      "hex",
+      "hex_urbanizado.parquet"
+    ) |>
+    st_read_parquet()
+
+  mun_bbox <- st_bbox(mun_hex)
+  br_pbf <- osm_brazil_latest_file
+  mun_pbf <- file.path(dir_mun, "redeviaria.osm.pbf")
+
+  # Executa Osmosis.
+  tic(msg = paste("Extraindo malha OSM para", cod))
+  system2(
+    "osmosis",
+    args = c(
+      paste("--read-pbf", br_pbf),
+      "--bounding-box",
+      paste0("left=", mun_bbox["xmin"]),
+      paste0("bottom=", mun_bbox["ymin"]),
+      paste0("right=", mun_bbox["xmax"]),
+      paste0("top=", mun_bbox["ymax"]),
+      paste("--write-pbf", mun_pbf)
+    )
+  )
+  toc()
+}
+```
+
+```{r}
+#| eval: false
+#| echo: false
+
+# DO NOT RUN!
+
+# This code block illustrates the use of the `osmdata` package to extract
+# OSM data. You don´t need to run it, since the previous code already does this.
+
+for (cod in municipios) {
+  print(paste("Processando", cod))
+
+  # Definir diretório de saída.
+  dir_mun <- file.path(dir_parcial, cod)
+  dir.create(dir_mun, showWarnings = FALSE, recursive = TRUE)
+
+  # Bounding box do município.
+  mun_hex <-
+    file.path(
+      dir_mun,
+      "hex",
+      "hex_urbanizado.parquet"
+    ) |>
+    st_read_parquet()
+
+  mun_bbox <- st_bbox(mun_hex)
+  mun_osm_file <- file.path(dir_mun, "redeviaria.parquet")
+
+  tic(msg = paste("Extraindo malha OSM para", cod))
+  osm_query <-
+    mun_bbox |>
+    opq() |>
+    add_osm_feature(key = "highway")
+
+  osm_result <- osmdata_sf(osm_query)
+  toc()
+
+  osm_result |>
+    extract2("osm_lines") |>
+    st_write_parquet(mun_osm_file)
+}
+```
+
+```{r}
+#| echo: false
+
+# beep(3)
+```
+
+## License
+
+::: {style="text-align: left;"}
+[![License: GPLv3](https://img.shields.io/badge/license-GPLv3-bd0000.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/license-CC_BY--NC--SA_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+:::
+
+::: {.callout-important}
+The original data sources may be subject to their own licensing terms and conditions.
+:::
+
+The code in this report is licensed under the [GNU General Public License Version 3](https://www.gnu.org/licenses/gpl-3.0), while the report is available under the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-nc-sa/4.0/).
+
+``` text
+Copyright (C) 2025 Flávio Soares, Clara Penz, Daniel Vartanian,
+Camila Nastari Fernandes & Mariana Abrantes Giannotti
+
+The code in this report is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License as published by the
+Free Software Foundation, either version 3 of the License, or (at your option)
+any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+this program. If not, see <https://www.gnu.org/licenses/>.
+```
+
+## Acknowledgments
+
+```{r, results='asis'}
+#| eval: true
+#| echo: false
+
+blocks <- list(
+  list(
+    logo_link = "https://doi.org/10.17605/OSF.IO/ZE6WT",
+    logo_src = "images/acessosan-logo.svg",
+    logo_alt = "AcessoSAN Logo",
+    logo_width = 140,
+    text = 'This work is part of a research project by the Polytechnic School (<a href="https://www.poli.usp.br/">Poli</a>) of the University of São Paulo (<a href="https://usp.br/">USP</a>), in partnership with the Secretariat for Food and Nutrition Security (<a href="https://www.gov.br/mds/pt-br/orgaos/SESAN">SESAN</a>) of the Ministry of Social Development, Family, and the Fight Against Hunger (<a href="https://www.gov.br/mds/">MDS</a>), titled: <em>AcessoSAN: Mapping Food Access to Support Public Policies on Food and Nutrition Security and Hunger Reduction in Brazilian Cities</em>.'
+  ),
+  list(
+    logo_link = "https://centrodametropole.fflch.usp.br",
+    logo_src = "images/cem-icon.svg",
+    logo_alt = "CEM Logo",
+    logo_width = 190,
+    text = 'This work was developed with support from the Center for Metropolitan Studies (<a href="https://centrodametropole.fflch.usp.br">CEM</a>) based at the School of Philosophy, Letters and Human Sciences (<a href="https://www.fflch.usp.br/">FFLCH</a>) of the University of São Paulo (<a href="https://usp.br">USP</a>) and at the Brazilian Center for Analysis and Planning (<a href="https://cebrap.org.br/">CEBRAP</a>).'
+  ),
+  list(
+    logo_link = "https://fapesp.br/",
+    logo_src = "images/fapesp-logo.svg",
+    logo_alt = "FAPESP Logo",
+    logo_width = 160,
+    text = 'This study was financed, in part, by the São Paulo Research Foundation (<a href="https://fapesp.br/">FAPESP</a>), Brazil. Process Number <a href="https://bv.fapesp.br/en/bolsas/231507/geospatial-data-science-applied-to-food-policies/">2025/17879-2</a>.'
+  )
+)
+
+blocks |>
+  lapply(
+    function(x) {
+      div(
+        style = paste0(
+          "display: flex; ",
+          "align-items: flex-start; ",
+          "margin-bottom: 2em;"
+        ),
+        div(
+          style = paste0(
+            "flex: 0 0 30%; ",
+            "display: flex; ",
+            "justify-content: center; ",
+            "margin: auto 0;"
+          ),
+          tags$a(
+            href = x$logo_link,
+            tags$img(
+              src = x$logo_src,
+              alt = x$logo_alt,
+              style = paste0(
+                "max-width: ", x$logo_width, "px; ",
+                "width: 100%; ",
+                "height: auto;"
+              )
+            )
+          )
+        ),
+        div(
+          style = paste0(
+            "flex: 1; ",
+            "padding-left: 1em;"
+          ),
+          HTML(x$text)
+        )
+      )
+    }
+  ) |>
+  tagList() |>
+  browsable()
+```

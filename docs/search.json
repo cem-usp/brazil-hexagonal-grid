@@ -1,0 +1,65 @@
+[
+  {
+    "objectID": "index.html#overview",
+    "href": "index.html#overview",
+    "title": "",
+    "section": "Overview",
+    "text": "Overview\nThis report presents a reproducible pipeline for generating hexagonal grids of Brazilian municipalities. The pipeline was developed in the R programming language by Flávio Soares and Clara Penz, with further adaptations by Daniel Vartanian.\nFor instructions on how to run the pipeline, see the repository README."
+  },
+  {
+    "objectID": "index.html#set-the-environment",
+    "href": "index.html#set-the-environment",
+    "title": "",
+    "section": "Set the Environment",
+    "text": "Set the Environment\nLoad Packages\n\nlibrary(arrow)\nlibrary(beepr)\nlibrary(curl)\nlibrary(dplyr)\nlibrary(elevatr)\nlibrary(fs)\nlibrary(geobr)\nlibrary(h3jsr)\nlibrary(here)\nlibrary(htmltools)\nlibrary(lockr) # github.com/danielvartan/lockr\nlibrary(magrittr)\nlibrary(osfr)\nlibrary(osmdata)\nlibrary(raster)\nlibrary(readr)\nlibrary(sf)\nlibrary(sfarrow)\nlibrary(tictoc)\n\nSet Keys\n\nosf_pat &lt;- Sys.getenv(\"OSF_PAT\") # askpass()\n\n\nosf_auth(osf_pat)\n\n\npublic_key &lt;- here(\"_ssh\", \"id_rsa.pub\")\n\n\nprivate_key &lt;- here(\"_ssh\", \"id_rsa\")\n\n\npassword &lt;- Sys.getenv(\"ACESSOSAN_PASSWORD\") # askpass()\n\nSet Input and Output Paths\n\ndir_inputs &lt;- here(\"1-inputs\")\ndir_parcial &lt;- here(\"2-parcial\")\n\n\nfor (i in c(dir_inputs, dir_parcial)) {\n  if (!dir_exists(i)) {\n    dir_create(i, recurse = TRUE)\n  }\n}\n\nSet Municipality Data\n\nmunicipios &lt;- c(\n  3550308, # São Paulo\n  2507507, # João Pessoa\n  3106200, # Belo Horizonte\n  4314902, # Porto Alegre\n  1721000, # Palmas\n  5300108, # Brasília\n  5208707  # Goiânia\n)\n\nSet Initial Variables\n\nset.seed(2025)"
+  },
+  {
+    "objectID": "index.html#download-ibge-census-data",
+    "href": "index.html#download-ibge-census-data",
+    "title": "",
+    "section": "Download IBGE Census Data",
+    "text": "Download IBGE Census Data\nDownload File\n\nosf_raw_data_id &lt;- \"zuy4s\"\n\n\nosf_raw_data_files &lt;-\n  osf_raw_data_id |&gt;\n  osf_retrieve_node() |&gt;\n  osf_ls_files(\n    type = \"file\",\n    pattern = \"censo2022_hex\",\n    n_max = Inf\n  )\n\nosf_raw_data_files\n\n\nibge_2022_census_hex_file &lt;-\n  osf_raw_data_files |&gt;\n  osf_download(path = dir_inputs, conflicts = \"overwrite\") |&gt;\n  extract2(\"local_path\")\n\nUnlock File\n\nibge_2022_census_hex_file &lt;-\n  ibge_2022_census_hex_file |&gt;\n  unlock_file(\n    private_key = private_key,\n    suffix = \".lockr\",\n    remove_file = TRUE,\n    password = password\n  )"
+  },
+  {
+    "objectID": "index.html#download-brazil-osm-data",
+    "href": "index.html#download-brazil-osm-data",
+    "title": "",
+    "section": "Download Brazil OSM Data",
+    "text": "Download Brazil OSM Data\n\nSource: https://download.geofabrik.de/south-america/brazil.html\n\n\nfile.path(\n  \"https://download.geofabrik.de\",\n  \"south-america\",\n  \"brazil-latest.osm.pbf\"\n) |&gt;\n  curl_download(\n    destfile = here(dir_inputs, \"brazil-latest.osm.pbf\"),\n    quiet = FALSE\n  )\n\n\nosm_brazil_latest_file &lt;- here(dir_inputs, \"brazil-latest.osm.pbf\")"
+  },
+  {
+    "objectID": "index.html#criar_malha_hexagonal_areas_total_urbana.r",
+    "href": "index.html#criar_malha_hexagonal_areas_total_urbana.r",
+    "title": "",
+    "section": "01.01-criar_malha_hexagonal_areas_total_urbana.R",
+    "text": "01.01-criar_malha_hexagonal_areas_total_urbana.R\n\nCria malhas hexagonais para os municípios a serem analisados.\nAqui teria 2 etapas que estão faltando no script:\n\nTrabalhar a área urbanizada do IBGE.\nGerar hexágonos da área urbanizada.\n\n\nLer Hexágonos Urbanizados do Brasil com Dados do Censo 2022\n\nhexurb &lt;-\n  ibge_2022_census_hex_file |&gt;\n  read_delim(delim = \",\") |&gt;\n  # Filtrar fora linhas com somente 0 em todas as variáveis exceto `h3_address`.\n  filter(!if_all(-h3_address, \\(x) x == 0))\n\nhexurb |&gt; glimpse()\n\nCriar Malha Hexagonal e Separar entre Urbano e Não-Urbano\n\nfor (cod in municipios) {\n  # Baixar geometria do município.\n  municipio_geom &lt;- read_municipality(code_muni = cod, year = 2020)\n\n  # Converter polígono para células H3.\n  hex &lt;- polygon_to_cells(geometry = municipio_geom$geom, res = 9)\n\n  # Converter células H3 de volta para polígonos.\n  hexgrid &lt;- cell_to_polygon(input = hex, simple = FALSE)\n\n  print(paste(\"Malha hexagonal criada para\", cod))\n\n  # Separar hexágonos urbanizados.\n  hex_urb_mun &lt;-\n    hexgrid |&gt;\n    left_join(hexurb, by = \"h3_address\") |&gt;\n    filter(if_all(-h3_address, ~ !is.na(.x))) |&gt;\n    mutate(across(where(is.numeric) & !any_of(\"h3_address\"), abs))\n\n  print(\"Filtragem realizada\")\n\n  # Criar diretório.\n  dir_hex &lt;- file.path(dir_parcial, cod, \"hex\")\n  dir.create(dir_hex, showWarnings = FALSE, recursive = TRUE)\n\n  # Salvar arquivos.\n  # Total\n  st_write_parquet(hexgrid, file.path(dir_hex, \"hex.parquet\"))\n  # Urbanizado\n  st_write_parquet(hex_urb_mun, file.path(dir_hex, \"hex_urbanizado.parquet\"))\n}"
+  },
+  {
+    "objectID": "index.html#processar_elevation.r",
+    "href": "index.html#processar_elevation.r",
+    "title": "",
+    "section": "01.02-processar_elevation.R",
+    "text": "01.02-processar_elevation.R\nCriar Arquivo .tiff para a Área Urbanizada de Cada Município\n\nfor (cod in municipios) {\n  # Definir caminho do arquivo `.tiff`.\n  elevation_path &lt;- file.path(dir_parcial, cod, \"elevation.tiff\")\n\n  # Ler `hexgrid` do município\n  hexgrid &lt;-\n    file.path(\n      dir_parcial,\n      cod,\n      \"hex\",\n      \"hex_urbanizado.parquet\"\n    ) |&gt;\n    st_read_parquet()\n\n  # Criar raster de elevação (zoom `z=13`)\n  elev_raster &lt;-\n    hexgrid |&gt;\n    get_elev_raster(\n      z = 13,\n      override_size_check = TRUE\n    )\n\n  # Salvar .tiff\n  writeRaster(elev_raster, elevation_path, overwrite = TRUE)\n\n  print(paste(\"Arquivo .tiff criado para município\", cod))\n}"
+  },
+  {
+    "objectID": "index.html#processar_osm.r",
+    "href": "index.html#processar_osm.r",
+    "title": "",
+    "section": "01.03-processar_osm.R",
+    "text": "01.03-processar_osm.R\nCriar Malha de Transporte para a Área Urbanizada de Cada Município\n\nfor (cod in municipios) {\n  print(paste(\"Processando\", cod))\n\n  # Definir diretório de saída.\n  dir_mun &lt;- file.path(dir_parcial, cod)\n  dir.create(dir_mun, showWarnings = FALSE, recursive = TRUE)\n\n  # Bounding box do município.\n  mun_hex &lt;-\n    file.path(\n      dir_mun,\n      \"hex\",\n      \"hex_urbanizado.parquet\"\n    ) |&gt;\n    st_read_parquet()\n\n  mun_bbox &lt;- st_bbox(mun_hex)\n  br_pbf &lt;- osm_brazil_latest_file\n  mun_pbf &lt;- file.path(dir_mun, \"redeviaria.osm.pbf\")\n\n  # Executa Osmosis.\n  tic(msg = paste(\"Extraindo malha OSM para\", cod))\n  system2(\n    \"osmosis\",\n    args = c(\n      paste(\"--read-pbf\", br_pbf),\n      \"--bounding-box\",\n      paste0(\"left=\", mun_bbox[\"xmin\"]),\n      paste0(\"bottom=\", mun_bbox[\"ymin\"]),\n      paste0(\"right=\", mun_bbox[\"xmax\"]),\n      paste0(\"top=\", mun_bbox[\"ymax\"]),\n      paste(\"--write-pbf\", mun_pbf)\n    )\n  )\n  toc()\n}"
+  },
+  {
+    "objectID": "index.html#license",
+    "href": "index.html#license",
+    "title": "",
+    "section": "License",
+    "text": "License\n\n \n\n\n\n\n\n\n\nThe original data sources may be subject to their own licensing terms and conditions.\n\n\n\nThe code in this report is licensed under the GNU General Public License Version 3, while the report is available under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International.\nCopyright (C) 2025 Flávio Soares, Clara Penz, Daniel Vartanian,\nCamila Nastari Fernandes & Mariana Abrantes Giannotti\n\nThe code in this report is free software: you can redistribute it and/or\nmodify it under the terms of the GNU General Public License as published by the\nFree Software Foundation, either version 3 of the License, or (at your option)\nany later version.\n\nThis program is distributed in the hope that it will be useful, but WITHOUT ANY\nWARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A\nPARTICULAR PURPOSE. See the GNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License along with\nthis program. If not, see &lt;https://www.gnu.org/licenses/&gt;."
+  },
+  {
+    "objectID": "index.html#acknowledgments",
+    "href": "index.html#acknowledgments",
+    "title": "",
+    "section": "Acknowledgments",
+    "text": "Acknowledgments\n\n\n\n\n\nThis work is part of a research project by the Polytechnic School (Poli) of the University of São Paulo (USP), in partnership with the Secretariat for Food and Nutrition Security (SESAN) of the Ministry of Social Development, Family, and the Fight Against Hunger (MDS), titled: AcessoSAN: Mapping Food Access to Support Public Policies on Food and Nutrition Security and Hunger Reduction in Brazilian Cities.\n\n\n\n\n\n\nThis work was developed with support from the Center for Metropolitan Studies (CEM) based at the School of Philosophy, Letters and Human Sciences (FFLCH) of the University of São Paulo (USP) and at the Brazilian Center for Analysis and Planning (CEBRAP).\n\n\n\n\n\n\nThis study was financed, in part, by the São Paulo Research Foundation (FAPESP), Brazil. Process Number 2025/17879-2."
+  }
+]
