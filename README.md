@@ -18,8 +18,6 @@ The pipeline require pre-processed data from the [2022 Brazilian census](https:/
 
 No processed data is available for download.
 
-If you already have access, click [here](https://osf.io/zuy4s) to download the raw dataset. You can also retrieve the files directly from [R](https://www.r-project.org/) using the [`osfr`](https://docs.ropensci.org/osfr/) package.
-
 ## Usage
 
 The pipeline was developed using the [Quarto](https://quarto.org/) publishing system, the [R programming language](https://www.r-project.org/) and the [Osmosis](https://wiki.openstreetmap.org/wiki/Osmosis) command line Java application for processing OpenStreetMap ([OSM](https://www.openstreetmap.org/)) data. To ensure consistent results, the [`renv`](https://rstudio.github.io/renv/) package is used to manage and restore the R environment.
