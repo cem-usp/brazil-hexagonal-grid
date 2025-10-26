@@ -274,7 +274,11 @@ div.csl-indent {
 <p>The data used in this report come from the following sources:</p>
 <ul>
 <li>Brazilian Institute of Geography and Statistics (<a href="https://www.ibge.gov.br/">IBGE</a>): Data from the <a href="https://en.wikipedia.org/wiki/2022_Brazilian_census">2022 Brazilian Census</a>.</li>
+<li>
+<a href="https://registry.opendata.aws/terrain-tiles/">Mapzen Terrain Tile</a>: Data on terrain and elevation.</li>
 <li>OpenStreetMap (<a href="https://www.openstreetmap.org/">OSM</a>): Geospatial data on highways, roads, and other infrastructure for Brazilian municipalities.</li>
+<li>
+<a href="https://opentopography.org/">OpenTopography</a>: Data on topography and elevation.</li>
 </ul></section><section id="data-munging" class="level3"><h3 class="anchored" data-anchor-id="data-munging">Data Munging</h3>
 <p>The data munging follow the data science workflow outlined by <span class="citation" data-cites="wickham2023e">Wickham et al. (<a href="#ref-wickham2023e" role="doc-biblioref">2023</a>)</span>, as illustrated in <a href="#fig-wickham-at-al-2023-figure-1" class="quarto-xref">Figure&nbsp;1</a>. All processes were made using the <a href="https://quarto.org/">Quarto</a> publishing system <span class="citation" data-cites="allaire">(<a href="#ref-allaire" role="doc-biblioref">Allaire et al., n.d.</a>)</span>, the <a href="https://www.r-project.org/">R programming language</a> <span class="citation" data-cites="rcoreteama">(<a href="#ref-rcoreteama" role="doc-biblioref">R Core Team, n.d.</a>)</span> and several R packages.</p>
 <p>For data manipulation and workflow, priority was given to packages from the <a href="https://www.tidyverse.org/">tidyverse</a>, <a href="https://ropensci.org/">rOpenSci</a> and <a href="https://r-spatial.org/">r-spatial</a> ecosystems, as well as other packages adhering to the tidy tools manifesto <span class="citation" data-cites="wickham2023c">(<a href="#ref-wickham2023c" role="doc-biblioref">Wickham, 2023</a>)</span>.</p>

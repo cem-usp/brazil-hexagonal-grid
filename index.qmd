@@ -44,7 +44,9 @@ If you already have access to the OSF repository and the project keys, click [he
 The data used in this report come from the following sources:
 
 - Brazilian Institute of Geography and Statistics ([IBGE](https://www.ibge.gov.br/)): Data from the [2022 Brazilian Census](https://en.wikipedia.org/wiki/2022_Brazilian_census).
+- [Mapzen Terrain Tile](https://registry.opendata.aws/terrain-tiles/): Data on terrain and elevation.
 - OpenStreetMap ([OSM](https://www.openstreetmap.org/)): Geospatial data on highways, roads, and other infrastructure for Brazilian municipalities.
+- [OpenTopography](https://opentopography.org/): Data on topography and elevation.
 
 ### Data Munging
 
