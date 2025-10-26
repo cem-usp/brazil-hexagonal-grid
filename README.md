@@ -12,11 +12,17 @@ This repository provides a reproducible pipeline for generating [hexagonal grids
 
 The report is available [here](https://cem-usp.github.io/brazil-hexagonal-grid/).
 
+> If you find this project useful, please consider giving it a star! [![GitHub repo stars](https://img.shields.io/github/stars/cem-usp/logo-pattern)](https://github.com/cem-usp/brazil-hexagonal-grid/)
+
 ## Data Availability
 
-The pipeline require pre-processed data from the [2022 Brazilian census](https://en.wikipedia.org/wiki/2022_Brazilian_census). These data are not publicly available and can only be accessed by authorized personnel. They are protected with [RSA](https://en.wikipedia.org/wiki/RSA_cryptosystem) 4096-bit encryption ([OpenSSL](https://www.openssl.org/)) and a 32-byte password to ensure data security.
+[![OSF ID](https://img.shields.io/badge/OSF%20ID-00000-1284C5.svg)](https://osf.io)
 
-No processed data is available for download.
+The processed data are available in both [`rds`](https://rdrr.io/r/base/readRDS.html) and [`parquet`](https://en.wikipedia.org/wiki/Apache_Parquet) formats through a dedicated repository on the Open Science Framework ([OSF](https://osf.io/)). A metadata file is included alongside the validated datasets.
+
+Because the raw data are not publicly available, only authorized personnel can access the processed files. They are protected with [RSA](https://en.wikipedia.org/wiki/RSA_cryptosystem) 4096-bit encryption ([OpenSSL](https://www.openssl.org/)) and a 32-byte password to ensure data security.
+
+If you already have access to the OSF repository and the project keys, click [here](https://osf.io/) to access the data. A backup copy of the raw data is also stored on OSF and can be accessed [here](https://osf.io/zuy4s/). You can also retrieve these files directly from [R](https://www.r-project.org/) using the [`osfr`](https://docs.ropensci.org/osfr/) package.
 
 ## Usage
 
@@ -70,6 +76,29 @@ Then reinstall the `arrow` package:
 install.packages("arrow")
 ```
 
+## Citation
+
+> [!IMPORTANT]
+> When using this data, you must also cite the original data sources.
+
+To cite this work, please use the following format:
+
+Soares, F., Penz, C., Vartanian, D., Fernandes, C. N., & Giannotti, M. A. (2025). *A reproducible pipeline for generating hexagonal grids of Brazilian municipalities* \[Computer software\]. Center for Metropolitan Studies of the University of São Paulo. <https://cem-usp.github.io/brazil-hexagonal-grid>
+
+A BibLaTeX entry for LaTeX users is
+
+```latex
+@software{soares2025,
+  title = {A reproducible pipeline for generating hexagonal grids of Brazilian municipalities},
+  author = {{Flávio Soares} and {Clara Penz} and {Daniel Vartanian} and {Camila Nastari Fernandes} and {Mariana Abrantes Giannotti}},
+  year = {2025},
+  address = {São Paulo},
+  institution = {Center for Metropolitan Studies of the University of São Paulo},
+  langid = {en},
+  url = {https://cem-usp.github.io/brazil-hexagonal-grid}
+}
+```
+
 ## License
 
 [![License: GPLv3](https://img.shields.io/badge/license-GPLv3-bd0000.svg)](https://www.gnu.org/licenses/gpl-3.0)
@@ -81,8 +110,7 @@ install.packages("arrow")
 The code in this repository is licensed under the [GNU General Public License Version 3](https://www.gnu.org/licenses/gpl-3.0), while the report is available under the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-nc-sa/4.0/).
 
 ``` text
-Copyright (C) 2025 Flávio Soares, Clara Penz, Daniel Vartanian,
-Camila Nastari Fernandes & Mariana Abrantes Giannotti
+Copyright (C) 2025 Center for Metropolitan Studies
 
 The code in this report is free software: you can redistribute it and/or
 modify it under the terms of the GNU General Public License as published by the
@@ -143,4 +171,3 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     </td>
   </tr>
 </table>
-

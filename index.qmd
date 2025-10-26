@@ -13,17 +13,67 @@ source(here("R", "_setup.R"))
 [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/license-CC_BY--NC--SA_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 <!-- badges: end -->
 
+::: {.callout-important}
+This pipeline is a **Work In Progress** (WIP) and is under active development. It may not yet be stable or suitable for public use. Please use it with caution and report any issues you encounter.
+:::
+
 ## Overview
 
 This report presents a reproducible pipeline for generating [hexagonal grids](https://en.wikipedia.org/wiki/Grid_(spatial_index)) of Brazilian municipalities. The pipeline was developed in the [R programming language](https://www.r-project.org/) by **Flávio Soares** and **Clara Penz**, with further adaptations by [**Daniel Vartanian**](https://github.com/danielvartan).
 
 For instructions on how to run the pipeline, see the repository [README](https://github.com/cem-usp/brazil-hexagonal-grid/blob/main/README.md).
 
+## Problem
+
+## Data Availability
+
+::: {style="text-align: left;"}
+[![](https://img.shields.io/badge/OSF%20ID-00000-1284C5.svg)](https://osf.io)
+:::
+
+The processed data are available in both [`rds`](https://rdrr.io/r/base/readRDS.html) and [`parquet`](https://en.wikipedia.org/wiki/Apache_Parquet) formats through a dedicated repository on the Open Science Framework ([OSF](https://osf.io/)). A metadata file is included alongside the validated datasets.
+
+Because the raw data are not publicly available, only authorized personnel can access the processed files. They are protected with [RSA](https://en.wikipedia.org/wiki/RSA_cryptosystem) 4096-bit encryption ([OpenSSL](https://www.openssl.org/)) and a 32-byte password to ensure data security.
+
+If you already have access to the OSF repository and the project keys, click [here](https://osf.io/) to access the data. A backup copy of the raw data is also stored on OSF and can be accessed [here](https://osf.io/zuy4s/). You can also retrieve these files directly from [R](https://www.r-project.org/) using the [`osfr`](https://docs.ropensci.org/osfr/) package.
+
+## Methods
+
+### Source of Data
+
+The data used in this report come from the following sources:
+
+- Brazilian Institute of Geography and Statistics ([IBGE](https://www.ibge.gov.br/)): Data from the [2022 Brazilian Census](https://en.wikipedia.org/wiki/2022_Brazilian_census).
+- OpenStreetMap ([OSM](https://www.openstreetmap.org/)): Geospatial data on highways, roads, and other infrastructure for Brazilian municipalities.
+
+### Data Munging
+
+The data munging follow the data science workflow outlined by @wickham2023e, as illustrated in [@fig-wickham-at-al-2023-figure-1]. All processes were made using the [Quarto](https://quarto.org/) publishing system [@allaire], the [R programming language](https://www.r-project.org/) [@rcoreteama] and several R packages.
+
+For data manipulation and workflow, priority was given to packages from the [tidyverse](https://www.tidyverse.org/), [rOpenSci](https://ropensci.org/) and [r-spatial](https://r-spatial.org/) ecosystems, as well as other packages adhering to the tidy tools manifesto [@wickham2023c].
+
+::: {#fig-wickham-at-al-2023-figure-1}
+![](images/wickham-at-al-2023-figure-1.png){width=75%}
+
+[Source: Reproduced from @wickham2023e.]{.legend}
+
+Data science workflow created by Wickham, Çetinkaya-Runde, and Grolemund.
+:::
+
+### Code Style
+
+The Tidyverse [code style guide](https://style.tidyverse.org/) and [design principles](https://design.tidyverse.org/) were followed to ensure consistency and enhance readability.
+
+### Reproducibility
+
+The pipeline is fully reproducible and can be run again at any time. To ensure consistent results, the [`renv`](https://rstudio.github.io/renv/) package [@usheya] is used to manage and restore the R environment. See the [README](https://github.com/cem-usp/brazil-hexagonal-grid/blob/main/README.md) file in the code repository to learn how to run it.
+
 ## Set the Environment
 
 ### Load Packages
 
 ```{r}
+#| label: Set the Environment
 #| output: false
 
 library(arrow)
@@ -112,6 +162,8 @@ set.seed(2025)
 ### Download File
 
 ```{r}
+#| label: Download IBGE Census Data
+
 osf_raw_data_id <- "zuy4s"
 ```
 
@@ -163,9 +215,8 @@ ibge_2022_census_hex_file <- here(dir_inputs, "censo2022_hex.csv")
 
 ## Download Brazil OSM Data
 
-> Source: <https://download.geofabrik.de/south-america/brazil.html>
-
 ```{r}
+#| label: Download Brazil OSM Data
 #| eval: false
 
 file.path(
@@ -195,6 +246,7 @@ osm_brazil_latest_file <- here(dir_inputs, "brazil-latest.osm.pbf")
 ### Ler Hexágonos Urbanizados do Brasil com Dados do Censo 2022
 
 ```{r}
+#| label: 01.01-criar_malha_hexagonal_areas_total_urbana.R
 #| eval: false
 
 hexurb <-
@@ -249,6 +301,7 @@ for (cod in municipios) {
 ### Criar Arquivo `.tiff` para a Área Urbanizada de Cada Município
 
 ```{r}
+#| label: 01.02-processar_elevation.R
 #| eval: false
 
 for (cod in municipios) {
@@ -285,6 +338,7 @@ for (cod in municipios) {
 ### Criar Malha de Transporte para a Área Urbanizada de Cada Município
 
 ```{r}
+#| label: 01.03-processar_osm.R
 #| eval: false
 #| output: false
 
@@ -375,6 +429,30 @@ for (cod in municipios) {
 # beep(3)
 ```
 
+## Citation
+
+::: {.callout-important}
+When using this data, you must also cite the original data sources.
+:::
+
+To cite this work, please use the following format:
+
+Soares, F., Penz, C., Vartanian, D., Fernandes, C. N., & Giannotti, M. A. (2025). *A reproducible pipeline for generating hexagonal grids of Brazilian municipalities* \[Computer software\]. Center for Metropolitan Studies of the University of São Paulo. <https://cem-usp.github.io/brazil-hexagonal-grid>
+
+A BibTeX entry for LaTeX users is
+
+```latex
+@software{soares2025,
+  title = {A reproducible pipeline for generating hexagonal grids of Brazilian municipalities},
+  author = {{Flávio Soares} and {Clara Penz} and {Daniel Vartanian} and {Camila Nastari Fernandes} and {Mariana Abrantes Giannotti}},
+  year = {2025},
+  address = {São Paulo},
+  institution = {Center for Metropolitan Studies of the University of São Paulo},
+  langid = {en},
+  url = {https://cem-usp.github.io/brazil-hexagonal-grid}
+}
+```
+
 ## License
 
 ::: {style="text-align: left;"}
@@ -389,8 +467,7 @@ The original data sources may be subject to their own licensing terms and condit
 The code in this report is licensed under the [GNU General Public License Version 3](https://www.gnu.org/licenses/gpl-3.0), while the report is available under the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-nc-sa/4.0/).
 
 ``` text
-Copyright (C) 2025 Flávio Soares, Clara Penz, Daniel Vartanian,
-Camila Nastari Fernandes & Mariana Abrantes Giannotti
+Copyright (C) 2025 Center for Metropolitan Studies
 
 The code in this report is free software: you can redistribute it and/or
 modify it under the terms of the GNU General Public License as published by the
@@ -477,3 +554,8 @@ blocks |>
   tagList() |>
   browsable()
 ```
+
+## References {.unnumbered}
+
+::: {#refs}
+:::

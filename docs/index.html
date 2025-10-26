@@ -53,7 +53,27 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="site_libs/quarto-nav/headroom.min.js"></script>
@@ -73,7 +93,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="site_libs/bootstrap/bootstrap-bb5183dd889ed94b30793f9b52eee8b6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
 <link href="site_libs/bootstrap/bootstrap-dark-d3ef5e81a44729a7b94f400bdb21a674.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-bb5183dd889ed94b30793f9b52eee8b6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+<link href="site_libs/bootstrap/bootstrap-bb5183dd889ed94b30793f9b52eee8b6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script src="site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet"><script id="quarto-search-options" type="application/json">{
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -95,6 +118,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta property="og:image:alt" content="Center for Metropolitan Studies">
 <meta property="og:image:height" content="1600">
 <meta property="og:image:width" content="2400">
+<meta name="citation_title" content="A Reproducible Pipeline for Generating Hexagonal Grids of Brazilian Municipalities
+">
+<meta name="citation_author" content="Flávio Soares, Clara Penz, Daniel Vartanian, Camila Nastari Fernandes &amp;amp; Mariana Abrantes Giannotti">
+<meta name="citation_publication_date" content="2025-10-26">
+<meta name="citation_cover_date" content="2025-10-26">
+<meta name="citation_year" content="2025">
+<meta name="citation_online_date" content="2025-10-26">
+<meta name="citation_fulltext_html_url" content="https://cem-usp.github.io/brazil-hexagonal-grid/">
+<meta name="citation_language" content="en">
+<meta name="citation_reference" content="citation_title=Quarto;,citation_abstract=Quarto is an open-source scientific and technical publishing system built on Pandoc.;,citation_author=J. J. Allaire;,citation_author=Charles Teague;,citation_author=Yihui Xie;,citation_author=Christophe Dervieux;,citation_fulltext_html_url=https://quarto.org;,citation_doi=10.5281/ZENODO.5960048;,citation_publisher=Zenodo;">
+<meta name="citation_reference" content="citation_title=R: A language and environment for statistical computing;,citation_author=R Core Team;,citation_fulltext_html_url=https://www.R-project.org;,citation_publisher=R Foundation for Statistical Computing;">
+<meta name="citation_reference" content="citation_title=renv: Project environments;,citation_abstract=A dependency management toolkit for R. Using ’renv’, you can create and manage project-local R libraries, save the state of these libraries to a ’lockfile’, and later restore your library as required. Together, these tools can help make your projects more isolated, portable, and reproducible.;,citation_author=Kevin Ushey;,citation_author=Hadley Wickham;,citation_fulltext_html_url=https://doi.org/10.32614/CRAN.package.renv;">
+<meta name="citation_reference" content="citation_title=The tidy tools manifesto;,citation_abstract=tidyverse;,citation_author=Hadley Wickham;,citation_publication_date=2023;,citation_cover_date=2023;,citation_year=2023;,citation_fulltext_html_url=https://tidyverse.tidyverse.org/articles/manifesto.html;,citation_language=en-US;,citation_publisher=Tidyverse;">
+<meta name="citation_reference" content="citation_title=R for data science: Import, tidy, transform, visualize, and model data;,citation_abstract=Use R to turn data into insight, knowledge, and understanding. With this practical book, aspiring data scientists will learn how to do data science with R and RStudio, along with the tidyverseâ??a collection of R packages designed to work together to make data science fast, fluent, and fun. Even if you have no programming experience, this updated edition will have you doing data science quickly. You’ll learn how to import, transform, and visualize your data and communicate the results. And you’ll get a complete, big-picture understanding of the data science cycle and the basic tools you need to manage the details. Updated for the latest tidyverse features and best practices, new chapters show you how to get data from spreadsheets, databases, and websites. Exercises help you practice what you’ve learned along the way.;,citation_author=Hadley Wickham;,citation_author=Mine Çetinkaya-Rundel;,citation_author=Garrett Grolemund;,citation_publication_date=2023;,citation_cover_date=2023;,citation_year=2023;,citation_fulltext_html_url=https://r4ds.hadley.nz;,citation_isbn=978-1-4920-9740-2;,citation_language=en-US;">
 </head>
 <body class="nav-fixed quarto-light">
 
@@ -127,6 +164,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
 <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#problem" id="toc-problem" class="nav-link" data-scroll-target="#problem">Problem</a></li>
+  <li><a href="#data-availability" id="toc-data-availability" class="nav-link" data-scroll-target="#data-availability">Data Availability</a></li>
+  <li>
+<a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
+  <ul>
+<li><a href="#source-of-data" id="toc-source-of-data" class="nav-link" data-scroll-target="#source-of-data">Source of Data</a></li>
+  <li><a href="#data-munging" id="toc-data-munging" class="nav-link" data-scroll-target="#data-munging">Data Munging</a></li>
+  <li><a href="#code-style" id="toc-code-style" class="nav-link" data-scroll-target="#code-style">Code Style</a></li>
+  <li><a href="#reproducibility" id="toc-reproducibility" class="nav-link" data-scroll-target="#reproducibility">Reproducibility</a></li>
+  </ul>
+</li>
   <li>
 <a href="#set-the-environment" id="toc-set-the-environment" class="nav-link" data-scroll-target="#set-the-environment">Set the Environment</a>
   <ul>
@@ -164,8 +212,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><a href="#criar-malha-de-transporte-para-a-%C3%A1rea-urbanizada-de-cada-munic%C3%ADpio" id="toc-criar-malha-de-transporte-para-a-área-urbanizada-de-cada-município" class="nav-link" data-scroll-target="#criar-malha-de-transporte-para-a-%C3%A1rea-urbanizada-de-cada-munic%C3%ADpio">Criar Malha de Transporte para a Área Urbanizada de Cada Município</a></li>
   </ul>
 </li>
+  <li><a href="#citation" id="toc-citation" class="nav-link" data-scroll-target="#citation">Citation</a></li>
   <li><a href="#license" id="toc-license" class="nav-link" data-scroll-target="#license">License</a></li>
   <li><a href="#acknowledgments" id="toc-acknowledgments" class="nav-link" data-scroll-target="#acknowledgments">Acknowledgments</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/cem-usp/brazil-hexagonal-grid/edit/main/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/cem-usp/brazil-hexagonal-grid/blob/main/index.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/cem-usp/brazil-hexagonal-grid/issues/" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div><div class="quarto-other-links"><h2>Other Links</h2><ul><li><a href="https://centrodametropole.fflch.usp.br"><i class="bi bi-link-45deg"></i>Center for Metropolitan Studies</a></li></ul></div></nav>
     </div>
 <!-- main -->
@@ -198,10 +248,50 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 </header><!-- badges: start --><p><a href="https://www.repostatus.org/#active"><img src="https://www.repostatus.org/badges/latest/active.svg" class="img-fluid" alt="Project Status: Active – The project has reached a stable, usable state and is being actively developed."></a> <a href="https://www.gnu.org/licenses/gpl-3.0"><img src="https://img.shields.io/badge/license-GPLv3-bd0000.svg" class="img-fluid" alt="License: GPLv3"></a> <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/"><img src="https://img.shields.io/badge/license-CC_BY--NC--SA_4.0-lightgrey.svg" class="img-fluid" alt="License: CC BY-NC-SA 4.0"></a> <!-- badges: end --></p>
+<div class="callout callout-style-simple callout-important">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p>This pipeline is a <strong>Work In Progress</strong> (WIP) and is under active development. It may not yet be stable or suitable for public use. Please use it with caution and report any issues you encounter.</p>
+</div>
+</div>
+</div>
 <section id="overview" class="level2"><h2 class="anchored" data-anchor-id="overview">Overview</h2>
 <p>This report presents a reproducible pipeline for generating <a href="https://en.wikipedia.org/wiki/Grid_(spatial_index)">hexagonal grids</a> of Brazilian municipalities. The pipeline was developed in the <a href="https://www.r-project.org/">R programming language</a> by <strong>Flávio Soares</strong> and <strong>Clara Penz</strong>, with further adaptations by <a href="https://github.com/danielvartan"><strong>Daniel Vartanian</strong></a>.</p>
 <p>For instructions on how to run the pipeline, see the repository <a href="https://github.com/cem-usp/brazil-hexagonal-grid/blob/main/README.md">README</a>.</p>
-</section><section id="set-the-environment" class="level2"><h2 class="anchored" data-anchor-id="set-the-environment">Set the Environment</h2>
+</section><section id="problem" class="level2"><h2 class="anchored" data-anchor-id="problem">Problem</h2>
+</section><section id="data-availability" class="level2"><h2 class="anchored" data-anchor-id="data-availability">Data Availability</h2>
+<div style="text-align: left;">
+<p><a href="https://osf.io"><img src="https://img.shields.io/badge/OSF%20ID-00000-1284C5.svg" class="img-fluid"></a></p>
+</div>
+<p>The processed data are available in both <a href="https://rdrr.io/r/base/readRDS.html"><code>rds</code></a> and <a href="https://en.wikipedia.org/wiki/Apache_Parquet"><code>parquet</code></a> formats through a dedicated repository on the Open Science Framework (<a href="https://osf.io/">OSF</a>). A metadata file is included alongside the validated datasets.</p>
+<p>Because the raw data are not publicly available, only authorized personnel can access the processed files. They are protected with <a href="https://en.wikipedia.org/wiki/RSA_cryptosystem">RSA</a> 4096-bit encryption (<a href="https://www.openssl.org/">OpenSSL</a>) and a 32-byte password to ensure data security.</p>
+<p>If you already have access to the OSF repository and the project keys, click <a href="https://osf.io/">here</a> to access the data. A backup copy of the raw data is also stored on OSF and can be accessed <a href="https://osf.io/zuy4s/">here</a>. You can also retrieve these files directly from <a href="https://www.r-project.org/">R</a> using the <a href="https://docs.ropensci.org/osfr/"><code>osfr</code></a> package.</p>
+</section><section id="methods" class="level2"><h2 class="anchored" data-anchor-id="methods">Methods</h2>
+<section id="source-of-data" class="level3"><h3 class="anchored" data-anchor-id="source-of-data">Source of Data</h3>
+<p>The data used in this report come from the following sources:</p>
+<ul>
+<li>Brazilian Institute of Geography and Statistics (<a href="https://www.ibge.gov.br/">IBGE</a>): Data from the <a href="https://en.wikipedia.org/wiki/2022_Brazilian_census">2022 Brazilian Census</a>.</li>
+<li>OpenStreetMap (<a href="https://www.openstreetmap.org/">OSM</a>): Geospatial data on highways, roads, and other infrastructure for Brazilian municipalities.</li>
+</ul></section><section id="data-munging" class="level3"><h3 class="anchored" data-anchor-id="data-munging">Data Munging</h3>
+<p>The data munging follow the data science workflow outlined by <span class="citation" data-cites="wickham2023e">Wickham et al. (<a href="#ref-wickham2023e" role="doc-biblioref">2023</a>)</span>, as illustrated in <a href="#fig-wickham-at-al-2023-figure-1" class="quarto-xref">Figure&nbsp;1</a>. All processes were made using the <a href="https://quarto.org/">Quarto</a> publishing system <span class="citation" data-cites="allaire">(<a href="#ref-allaire" role="doc-biblioref">Allaire et al., n.d.</a>)</span>, the <a href="https://www.r-project.org/">R programming language</a> <span class="citation" data-cites="rcoreteama">(<a href="#ref-rcoreteama" role="doc-biblioref">R Core Team, n.d.</a>)</span> and several R packages.</p>
+<p>For data manipulation and workflow, priority was given to packages from the <a href="https://www.tidyverse.org/">tidyverse</a>, <a href="https://ropensci.org/">rOpenSci</a> and <a href="https://r-spatial.org/">r-spatial</a> ecosystems, as well as other packages adhering to the tidy tools manifesto <span class="citation" data-cites="wickham2023c">(<a href="#ref-wickham2023c" role="doc-biblioref">Wickham, 2023</a>)</span>.</p>
+<div id="fig-wickham-at-al-2023-figure-1" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-wickham-at-al-2023-figure-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Data science workflow created by Wickham, Çetinkaya-Runde, and Grolemund.
+</figcaption><div aria-describedby="fig-wickham-at-al-2023-figure-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<p><a href="images/wickham-at-al-2023-figure-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;1: Data science workflow created by Wickham, Çetinkaya-Runde, and Grolemund."><img src="images/wickham-at-al-2023-figure-1.png" class="img-fluid figure-img" style="width:75.0%"></a></p>
+<p><span class="legend">Source: Reproduced from <span class="citation" data-cites="wickham2023e">Wickham et al. (<a href="#ref-wickham2023e" role="doc-biblioref">2023</a>)</span>.</span></p>
+</div>
+</figure>
+</div>
+</section><section id="code-style" class="level3"><h3 class="anchored" data-anchor-id="code-style">Code Style</h3>
+<p>The Tidyverse <a href="https://style.tidyverse.org/">code style guide</a> and <a href="https://design.tidyverse.org/">design principles</a> were followed to ensure consistency and enhance readability.</p>
+</section><section id="reproducibility" class="level3"><h3 class="anchored" data-anchor-id="reproducibility">Reproducibility</h3>
+<p>The pipeline is fully reproducible and can be run again at any time. To ensure consistent results, the <a href="https://rstudio.github.io/renv/"><code>renv</code></a> package <span class="citation" data-cites="usheya">(<a href="#ref-usheya" role="doc-biblioref">Ushey &amp; Wickham, n.d.</a>)</span> is used to manage and restore the R environment. See the <a href="https://github.com/cem-usp/brazil-hexagonal-grid/blob/main/README.md">README</a> file in the code repository to learn how to run it.</p>
+</section></section><section id="set-the-environment" class="level2"><h2 class="anchored" data-anchor-id="set-the-environment">Set the Environment</h2>
 <section id="load-packages" class="level3"><h3 class="anchored" data-anchor-id="load-packages">Load Packages</h3>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/apache/arrow/">arrow</a></span><span class="op">)</span></span>
@@ -303,9 +393,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span>  <span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section></section><section id="download-brazil-osm-data" class="level2"><h2 class="anchored" data-anchor-id="download-brazil-osm-data">Download Brazil OSM Data</h2>
-<blockquote class="blockquote">
-<p>Source: <a href="https://download.geofabrik.de/south-america/brazil.html" class="uri">https://download.geofabrik.de/south-america/brazil.html</a></p>
-</blockquote>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span></span>
 <span>  <span class="st">"https://download.geofabrik.de"</span>,</span>
@@ -444,7 +531,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span>  <span class="fu"><a href="https://rdrr.io/pkg/tictoc/man/tic.html">toc</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-</section></section><section id="license" class="level2"><h2 class="anchored" data-anchor-id="license">License</h2>
+</section></section><section id="citation" class="level2"><h2 class="anchored" data-anchor-id="citation">Citation</h2>
+<div class="callout callout-style-simple callout-important">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p>When using this data, you must also cite the original data sources.</p>
+</div>
+</div>
+</div>
+<p>To cite this work, please use the following format:</p>
+<p>Soares, F., Penz, C., Vartanian, D., Fernandes, C. N., &amp; Giannotti, M. A. (2025). <em>A reproducible pipeline for generating hexagonal grids of Brazilian municipalities</em> [Computer software]. Center for Metropolitan Studies of the University of São Paulo. <a href="https://cem-usp.github.io/brazil-hexagonal-grid" class="uri">https://cem-usp.github.io/brazil-hexagonal-grid</a></p>
+<p>A BibTeX entry for LaTeX users is</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode latex code-with-copy"><code class="sourceCode latex"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>@software{soares2025,</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  title = {A reproducible pipeline for generating hexagonal grids of Brazilian municipalities},</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  author = {{Flávio Soares} and {Clara Penz} and {Daniel Vartanian} and {Camila Nastari Fernandes} and {Mariana Abrantes Giannotti}},</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  year = {2025},</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  address = {São Paulo},</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  institution = {Center for Metropolitan Studies of the University of São Paulo},</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>  langid = {en},</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>  url = {https://cem-usp.github.io/brazil-hexagonal-grid}</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section><section id="license" class="level2"><h2 class="anchored" data-anchor-id="license">License</h2>
 <div style="text-align: left;">
 <p><a href="https://www.gnu.org/licenses/gpl-3.0"><img src="https://img.shields.io/badge/license-GPLv3-bd0000.svg" class="img-fluid" alt="License: GPLv3"></a> <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/"><img src="https://img.shields.io/badge/license-CC_BY--NC--SA_4.0-lightgrey.svg" class="img-fluid" alt="License: CC BY-NC-SA 4.0"></a></p>
 </div>
@@ -459,8 +569,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>The code in this report is licensed under the <a href="https://www.gnu.org/licenses/gpl-3.0">GNU General Public License Version 3</a>, while the report is available under the <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International</a>.</p>
-<pre class="text"><code>Copyright (C) 2025 Flávio Soares, Clara Penz, Daniel Vartanian,
-Camila Nastari Fernandes &amp; Mariana Abrantes Giannotti
+<pre class="text"><code>Copyright (C) 2025 Center for Metropolitan Studies
 
 The code in this report is free software: you can redistribute it and/or
 modify it under the terms of the GNU General Public License as published by the
@@ -494,6 +603,24 @@ this program. If not, see &lt;https://www.gnu.org/licenses/&gt;.</code></pre>
 <img src="images/fapesp-logo.svg" alt="FAPESP Logo" style="max-width: 160px; width: 100%; height: auto;"></a>
 </div>
 <div style="flex: 1; padding-left: 1em;">This study was financed, in part, by the São Paulo Research Foundation (<a href="https://fapesp.br/">FAPESP</a>), Brazil. Process Number <a href="https://bv.fapesp.br/en/bolsas/231507/geospatial-data-science-applied-to-food-policies/">2025/17879-2</a>.</div>
+</div>
+</section><section id="references" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
+<div id="ref-allaire" class="csl-entry" role="listitem">
+Allaire, J. J., Teague, C., Xie, Y., &amp; Dervieux, C. (n.d.). <em>Quarto</em> [Computer software]. Zenodo. <a href="https://doi.org/10.5281/ZENODO.5960048">https://doi.org/10.5281/ZENODO.5960048</a>
+</div>
+<div id="ref-rcoreteama" class="csl-entry" role="listitem">
+R Core Team. (n.d.). <em>R: <span>A</span> language and environment for statistical computing</em> [Computer software]. R Foundation for Statistical Computing. <a href="https://www.R-project.org">https://www.R-project.org</a>
+</div>
+<div id="ref-usheya" class="csl-entry" role="listitem">
+Ushey, K., &amp; Wickham, H. (n.d.). <em><span class="nocase">renv</span>: <span>Project</span> environments</em> [Computer software]. <a href="https://doi.org/10.32614/CRAN.package.renv">https://doi.org/10.32614/CRAN.package.renv</a>
+</div>
+<div id="ref-wickham2023c" class="csl-entry" role="listitem">
+Wickham, H. (2023). <em>The tidy tools manifesto</em>. Tidyverse. <a href="https://tidyverse.tidyverse.org/articles/manifesto.html">https://tidyverse.tidyverse.org/articles/manifesto.html</a>
+</div>
+<div id="ref-wickham2023e" class="csl-entry" role="listitem">
+Wickham, H., Çetinkaya-Rundel, M., &amp; Grolemund, G. (2023). <em>R for data science: <span>Import</span>, tidy, transform, visualize, and model data</em> (2nd ed.). O’Reilly Media. <a href="https://r4ds.hadley.nz">https://r4ds.hadley.nz</a>
+</div>
 </div>
 
 
@@ -898,7 +1025,38 @@ this program. If not, see &lt;https://www.gnu.org/licenses/&gt;.</code></pre>
   });
   </script>
 </div> <!-- /content -->
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/cem-usp/brazil-hexagonal-grid/edit/main/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/cem-usp/brazil-hexagonal-grid/blob/main/index.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/cem-usp/brazil-hexagonal-grid/issues/" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
 
 
-
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/cem-usp/brazil-hexagonal-grid/edit/main/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/cem-usp/brazil-hexagonal-grid/blob/main/index.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/cem-usp/brazil-hexagonal-grid/issues/" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+</body></html>

@@ -15,8 +15,8 @@ title: >
   Municipalities
 author: "Flávio Soares, Clara Penz, Daniel Vartanian, Camila Nastari Fernandes & Mariana Abrantes Giannotti"
 keyword: >
-  Pipelines, Data Munging, Data Science, Spatial Data, Hex Grid, rstats,
-  OpenStreetMap, Open Data, Open Science, Brazil
+  Pipelines, Data Munging, Data Science, Open Data, Open Science, Spatial Data,
+  rstats, Reproducible Workflows, Hex Grid, OpenStreetMap, Brazil
 date: today
 date-format: long
 
@@ -68,4 +68,5 @@ format:
       - text: Center for Metropolitan Studies
         href: https://centrodametropole.fflch.usp.br
 
-google-scholar: false
+google-scholar: true
+bibliography: references.bib
